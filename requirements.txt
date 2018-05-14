@@ -1,2 +1,6 @@
+tika
+pytesseract
+beautifulsoup4
+nltk
 Django==2.0.5
 pytz==2018.4

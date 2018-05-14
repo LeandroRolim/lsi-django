@@ -5,8 +5,8 @@ from .models import *
 
 @admin.register(Document)
 class DocumentAdmin(admin.ModelAdmin):
-    list_display = ['title', 'url']
+    list_display = ['title', 'file']
 
 
-admin.site.register(DocumentTerm)
-admin.site.register(Term)
+# admin.site.register(DocumentTerm)
+# admin.site.register(Term)
