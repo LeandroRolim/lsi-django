@@ -10,6 +10,7 @@ from tika import parser
 from abc import ABCMeta, abstractmethod
 from nltk.corpus import stopwords
 from nltk.tokenize import RegexpTokenizer
+import os
 
 
 def remove_stopwords(list_terms):
@@ -99,3 +100,19 @@ class Docx(DocumentAbstract):
 
     def get_title(self):
         return self.soup.title.string if self.soup.title is not None else 'sem titulo'
+
+
+class DocumentFactory:
+    @staticmethod
+    def getFactory(file):
+        name, extension = os.path.splitext(file.name)
+        if extension == '.html':
+            return Html(file.url)
+        elif extension == '.pdf':
+            return PDF(file.url)
+        elif extension == '.docx':
+            return Docx(file.url)
+        elif extension in ['.png', '.jpeg']:
+            return OCR(file.url)
+        else:
+            raise Exception(file)
