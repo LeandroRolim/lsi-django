@@ -8,9 +8,23 @@ from PIL import Image
 from tika import parser
 
 from abc import ABCMeta, abstractmethod
+from nltk.corpus import stopwords
+from nltk.tokenize import RegexpTokenizer
+
+
+def remove_stopwords(list_terms):
+    stopWords = set(stopwords.words('portuguese'))
+    return list(filter(lambda w: w not in stopWords, list_terms))
+
+
+def remove_adverb_verb(list_terms):
+    with codecs.open('files/adverbs.txt') as arq:
+        adverbs = nltk.word_tokenize(arq.read())
+        return list(filter(lambda term: term not in adverbs, list_terms))
 
 
 class DocumentAbstract(metaclass=ABCMeta):
+    tokenizer = RegexpTokenizer(r'\w+')
 
     """recebe path, que é o caminha para o documento
     def __init__(self, path):
@@ -36,9 +50,7 @@ class Html(DocumentAbstract):
             self.soup = BeautifulSoup(html, 'lxml')
 
     def get_words(self):
-        tokens = nltk.word_tokenize(self.soup.get_text())
-        return list(map(lambda word: word, tokens))
-        # return list(map(lambda word: Term(word=str(word), frequency=1), tokens))
+        return self.tokenizer.tokenize(self.soup.get_text())
 
     def get_title(self):
         return self.soup.title.string
@@ -52,9 +64,8 @@ class PDF(DocumentAbstract):
             self.raw = parser.from_file(arq)
 
     def get_words(self):
-        tokens = nltk.word_tokenize(self.raw.get_text())
-        return list(map(lambda word: word, tokens))
-        # return list(map(lambda term: Term(word=str(term)), tokens))
+        return self.tokenizer.tokenize(self.raw.get_text())
+
 
     def get_title(self):
         return self.raw.title.string if self.raw.title is not None else 'sem titulo'
@@ -68,9 +79,7 @@ class OCR(DocumentAbstract):
 
     def get_words(self):
         text = pytesseract.image_to_string(self.img, lang='por')
-        tokens = nltk.word_tokenize(text)
-        return list(map(lambda word: word, tokens))
-        # return list(map(lambda word: Word(word=str(word)), texto))
+        return self.tokenizer.tokenize(text)
 
     def get_title(self):
         return 'sem titulo'
@@ -86,9 +95,7 @@ class Docx(DocumentAbstract):
                 self.soup= BeautifulSoup(doc.read(), 'xml')
 
     def get_words(self):
-        tokens = nltk.word_tokenize(self.soup.get_text())
-        return list(map(lambda word: word, tokens))
-        # return list(map(lambda word: Word(word=str(word)), tokens))
+        return self.tokenizer.tokenize(self.soup.get_text())
 
     def get_title(self):
         return self.soup.title.string if self.soup.title is not None else 'sem titulo'

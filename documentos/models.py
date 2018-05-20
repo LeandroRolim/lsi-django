@@ -42,17 +42,9 @@ class Document(models.Model):
                 doct = doct[0]
             else:
                 doct = DocumentTerm(document=doc, term=word)
-                #doct.term.add(word)
-                #doct.document.add(doc)
+
             doct.frequency += 1
             doct.save()
-            '''
-            DocumentTerm.objects.create(
-            document=doc,
-            term=terms,
-            frequency=2
-        )
-            '''
 
     def get_terms(self):
         return self.html.get_words()

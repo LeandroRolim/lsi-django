@@ -8,5 +8,18 @@ class DocumentAdmin(admin.ModelAdmin):
     list_display = ['title', 'file']
 
 
+@admin.register(DocumentTerm)
+class DocumentTermAdmin(admin.ModelAdmin):
+    list_display = ['term', 'frequency']
+    list_filter = ['document']
 # admin.site.register(DocumentTerm)
-# admin.site.register(Term)
+
+
+@admin.register(Term)
+class TermAdmin(admin.ModelAdmin):
+    list_display = [
+        'term',
+        'frequency',
+    ]
+
+#admin.site.register(Term)
