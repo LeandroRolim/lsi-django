@@ -8,6 +8,7 @@ from PIL import Image
 from tika import parser
 
 from abc import ABCMeta, abstractmethod
+from nltk.corpus import stopwords
 
 
 class DocumentAbstract(metaclass=ABCMeta):
@@ -26,6 +27,12 @@ class DocumentAbstract(metaclass=ABCMeta):
     def get_title(self):
         return u''
 
+    @staticmethod
+    def remove_stopwords(list_terms):
+        stopWords = set(stopwords.words('portuguese'))
+        return list(filter(lambda w: w not in stopWords, list_terms))
+
+
 
 class Html(DocumentAbstract):
     soup=None
@@ -36,9 +43,7 @@ class Html(DocumentAbstract):
             self.soup = BeautifulSoup(html, 'lxml')
 
     def get_words(self):
-        tokens = nltk.word_tokenize(self.soup.get_text())
-        return list(map(lambda word: word, tokens))
-        # return list(map(lambda word: Term(word=str(word), frequency=1), tokens))
+        return nltk.word_tokenize(self.soup.get_text())
 
     def get_title(self):
         return self.soup.title.string
@@ -52,9 +57,8 @@ class PDF(DocumentAbstract):
             self.raw = parser.from_file(arq)
 
     def get_words(self):
-        tokens = nltk.word_tokenize(self.raw.get_text())
-        return list(map(lambda word: word, tokens))
-        # return list(map(lambda term: Term(word=str(term)), tokens))
+        return nltk.word_tokenize(self.raw.get_text())
+
 
     def get_title(self):
         return self.raw.title.string if self.raw.title is not None else 'sem titulo'
@@ -68,9 +72,7 @@ class OCR(DocumentAbstract):
 
     def get_words(self):
         text = pytesseract.image_to_string(self.img, lang='por')
-        tokens = nltk.word_tokenize(text)
-        return list(map(lambda word: word, tokens))
-        # return list(map(lambda word: Word(word=str(word)), texto))
+        return nltk.word_tokenize(text)
 
     def get_title(self):
         return 'sem titulo'
@@ -86,9 +88,7 @@ class Docx(DocumentAbstract):
                 self.soup= BeautifulSoup(doc.read(), 'xml')
 
     def get_words(self):
-        tokens = nltk.word_tokenize(self.soup.get_text())
-        return list(map(lambda word: word, tokens))
-        # return list(map(lambda word: Word(word=str(word)), tokens))
+        return nltk.word_tokenize(self.soup.get_text())
 
     def get_title(self):
         return self.soup.title.string if self.soup.title is not None else 'sem titulo'
