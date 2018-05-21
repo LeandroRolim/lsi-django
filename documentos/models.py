@@ -1,9 +1,10 @@
 from django.db import models
-from .lsi import Html
-from functools import reduce
+from .lsi import *
+import os
 
 
 # Create your models here.
+
 
 class Term(models.Model):
     term = models.CharField(max_length=255, unique=True)
@@ -19,13 +20,15 @@ class Term(models.Model):
 class Document(models.Model):
     title = models.CharField(max_length=200)
     file = models.FileField()
+    stopwords = models.IntegerField(default=0)
+    adverb_verb = models.IntegerField(default=0)
     updated = models.DateTimeField(auto_now=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     terms = models.ManyToManyField(Term, through='DocumentTerm')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.html = Html(self.file.url)
+        self.docAbst = DocumentFactory.getFactory(self.file)
 
     @classmethod
     def make_corpus(cls, doc, terms):
@@ -47,10 +50,10 @@ class Document(models.Model):
             doct.save()
 
     def get_terms(self):
-        return self.html.get_words()
+        return self.docAbst.get_words()
 
     def save(self, *args, **kwargs):
-        self.title = self.html.get_title()
+        self.title = self.docAbst.get_title()
         super().save(self, *args, **kwargs)
 
     def __str__(self):
