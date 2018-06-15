@@ -5,7 +5,8 @@ from .models import *
 
 @admin.register(Document)
 class DocumentAdmin(admin.ModelAdmin):
-    list_display = ['title', 'file']
+    list_filter = ['title']
+    list_display = ['title', 'stopwords', 'adverb_verb', 'count_terms']
 
 
 @admin.register(DocumentTerm)

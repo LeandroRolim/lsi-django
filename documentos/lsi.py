@@ -1,8 +1,8 @@
 import nltk
 import codecs
-import pytesseract
 import zipfile
 
+import pytesseract
 from bs4 import BeautifulSoup
 from PIL import Image
 from tika import parser
@@ -51,7 +51,7 @@ class Html(DocumentAbstract):
             self.soup = BeautifulSoup(html, 'lxml')
 
     def get_words(self):
-        return self.tokenizer.tokenize(self.soup.get_text())
+        return list(self.tokenizer.tokenize(self.soup.get_text()))
 
     def get_title(self):
         return self.soup.title.string
@@ -76,10 +76,10 @@ class OCR(DocumentAbstract):
     img=None
 
     def __init__(self, path):
-        self.img = Image.open('download.jpg')
+        self.img = Image.open(path)
 
     def get_words(self):
-        text = pytesseract.image_to_string(self.img, lang='por')
+        text = pytesseract.image_to_string(self.img)
         return self.tokenizer.tokenize(text)
 
     def get_title(self):
