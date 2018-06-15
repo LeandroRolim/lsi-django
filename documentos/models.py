@@ -31,7 +31,9 @@ class Document(models.Model):
         self.docAbst = DocumentFactory.getFactory(self.file)
 
     @classmethod
-    def make_corpus(cls, doc, terms):
+    def make_corpus(cls, doc, terms_doc):
+
+        terms = remove_adverb_verb(remove_stopwords(terms_doc))
 
         for term in terms:
             word = Term.objects.get_or_create(term=term)[0]
@@ -59,7 +61,7 @@ class Document(models.Model):
     def save(self, *args, **kwargs):
         self.title = self.docAbst.get_title()
         self.stopwords = len(self.get_terms()) - len(remove_stopwords(self.get_terms()))
-        self.adverb_verb = len(self.get_terms()) - len(remove_adverb_verb(self.get_terms()))
+        self.adverb_verb = self.stopwords - len(remove_adverb_verb(self.get_terms()))
         print(self.stopwords)
         super().save(self, *args, **kwargs)
 
