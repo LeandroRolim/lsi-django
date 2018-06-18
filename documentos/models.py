@@ -20,8 +20,8 @@ class Term(models.Model):
 class Document(models.Model):
     title = models.CharField(max_length=200)
     file = models.FileField()
-    stopwords = models.IntegerField(default=0)
-    adverb_verb = models.IntegerField(default=0)
+    stopwords = models.IntegerField(default=1)
+    adverb_verb = models.IntegerField(default=1)
     updated = models.DateTimeField(auto_now=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     terms = models.ManyToManyField(Term, through='DocumentTerm')
@@ -50,10 +50,17 @@ class Document(models.Model):
             doct.save()
 
     def get_terms(self):
-        return self.docAbst.get_words()
+        terms = self.docAbst.get_words()
+        return terms
+
+    def count_terms(self):
+        return len(self.get_terms())
 
     def save(self, *args, **kwargs):
         self.title = self.docAbst.get_title()
+        self.stopwords = len(self.get_terms()) - len(remove_stopwords(self.get_terms()))
+        self.adverb_verb = len(self.get_terms()) - len(remove_adverb_verb(self.get_terms()))
+        print(self.stopwords)
         super().save(self, *args, **kwargs)
 
     def __str__(self):
