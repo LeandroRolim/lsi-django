@@ -1,7 +1,35 @@
 from django.db import models
 from .lsi import *
+from django.db.models.signals import post_save
 import os
 
+
+# add document to corpus
+
+def make_corpus(doc, terms_doc):
+    terms = remove_adverb_verb(remove_stopwords(terms_doc))
+
+    for term in terms:
+        word = Term.objects.get_or_create(term=term)[0]
+        word.frequency += 1
+        word.save()
+        doct = DocumentTerm.objects.filter(
+            document=doc.id,
+            term=word.id
+        )
+        if (len(doct) > 0):
+            doct = doct[0]
+        else:
+            doct = DocumentTerm(document=doc, term=word)
+
+        doct.frequency += 1
+        doct.save()
+
+
+def add_corpus(sender, **kwargs):
+    if kwargs['created']:
+        doc = kwargs['instance']
+        make_corpus(doc, doc.get_terms())
 
 # Create your models here.
 
@@ -30,25 +58,6 @@ class Document(models.Model):
         super().__init__(*args, **kwargs)
         self.docAbst = DocumentFactory.getFactory(self.file)
 
-    @classmethod
-    def make_corpus(cls, doc, terms):
-
-        for term in terms:
-            word = Term.objects.get_or_create(term=term)[0]
-            word.frequency += 1
-            word.save()
-            doct = DocumentTerm.objects.filter(
-                document=doc.id,
-                term=word.id
-            )
-            if(len(doct) > 0):
-                doct = doct[0]
-            else:
-                doct = DocumentTerm(document=doc, term=word)
-
-            doct.frequency += 1
-            doct.save()
-
     def get_terms(self):
         terms = self.docAbst.get_words()
         return terms
@@ -59,12 +68,19 @@ class Document(models.Model):
     def save(self, *args, **kwargs):
         self.title = self.docAbst.get_title()
         self.stopwords = len(self.get_terms()) - len(remove_stopwords(self.get_terms()))
-        self.adverb_verb = len(self.get_terms()) - len(remove_adverb_verb(self.get_terms()))
+        self.adverb_verb = len(remove_stopwords(self.get_terms())) - len(remove_adverb_verb(remove_stopwords(self.get_terms())))
         print(self.stopwords)
+        print(len(remove_stopwords(self.get_terms())))
+        print(len(remove_adverb_verb(remove_stopwords(self.get_terms()))))
         super().save(self, *args, **kwargs)
 
     def __str__(self):
         return self.title
+
+# event called on post save
+
+
+post_save.connect(add_corpus, sender=Document)
 
 
 class DocumentTerm(models.Model):

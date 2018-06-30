@@ -1,5 +1,7 @@
 from django.contrib import admin
+from .ranking import *
 from .models import *
+
 # Register your models here.
 
 
@@ -13,7 +15,6 @@ class DocumentAdmin(admin.ModelAdmin):
 class DocumentTermAdmin(admin.ModelAdmin):
     list_display = ['term', 'frequency']
     list_filter = ['document']
-# admin.site.register(DocumentTerm)
 
 
 @admin.register(Term)
@@ -21,6 +22,14 @@ class TermAdmin(admin.ModelAdmin):
     list_display = [
         'term',
         'frequency',
+        'TF',
     ]
 
-#admin.site.register(Term)
+    def TF(self, term):
+        return getTF(term)
+
+    def IDF(self, term):
+        return getIDF(term)
+
+    def TFIDF(self, term):
+        return getTFIDF(term)
