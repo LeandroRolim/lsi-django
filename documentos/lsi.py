@@ -61,8 +61,9 @@ class PDF(DocumentAbstract):
     raw = None
 
     def __init__(self, path):
-        with codecs.open(path, 'r') as arq:
-            self.raw = parser.from_file(arq)
+        self.raw = parser.from_file(path)
+        #with codecs.open(path, 'r') as arq:
+
 
     def get_words(self):
         return self.tokenizer.tokenize(self.raw.get_text())

@@ -90,3 +90,4 @@ class DocumentTerm(models.Model):
 
     def __str__(self):
         return self.term
+

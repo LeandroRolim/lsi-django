@@ -13,17 +13,14 @@ class DocumentAdmin(admin.ModelAdmin):
 
 @admin.register(DocumentTerm)
 class DocumentTermAdmin(admin.ModelAdmin):
-    list_display = ['term', 'frequency']
-    list_filter = ['document']
-
-
-@admin.register(Term)
-class TermAdmin(admin.ModelAdmin):
     list_display = [
         'term',
         'frequency',
         'TF',
+        'IDF',
+        'TFIDF',
     ]
+    list_filter = ['document']
 
     def TF(self, term):
         return getTF(term)
@@ -33,3 +30,12 @@ class TermAdmin(admin.ModelAdmin):
 
     def TFIDF(self, term):
         return getTFIDF(term)
+
+
+@admin.register(Term)
+class TermAdmin(admin.ModelAdmin):
+    list_display = [
+        'term',
+        'frequency',
+    ]
+

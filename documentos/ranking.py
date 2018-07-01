@@ -10,7 +10,7 @@ def getTF(term: Term):
 # Inverse Frequency Algorithm
 def getIDF(term: Term):
     qtdDocs = Document.objects.count()
-    qtdDocsTerm = Document.objects.filter(terms=term).count()
+    qtdDocsTerm = DocumentTerm.objects.filter(term__term=term).count()
     return log(qtdDocsTerm / qtdDocs)
 
 
