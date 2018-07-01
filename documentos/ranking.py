@@ -59,6 +59,18 @@ class DefaultIDF(IDFAbstract):
     # Default Algorithm
     def calculate(self, term: Term, document: Document):
         return log(getOrigIDF(term))
+      
+
+# Log Normalization Algorithm
+def getTF(term: Term):
+    return 1 + log(term.frequency)
+
+
+# Inverse Frequency Algorithm
+def getIDF(term: Term):
+    qtdDocs = Document.objects.count()
+    qtdDocsTerm = Document.objects.filter(terms=term).count()
+    return log(qtdDocsTerm / qtdDocs)
 
 
 # TF * IDF
