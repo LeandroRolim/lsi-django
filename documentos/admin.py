@@ -8,13 +8,36 @@ from .models import *
 @admin.register(Document)
 class DocumentAdmin(admin.ModelAdmin):
     list_filter = ['title']
-    list_display = ['title', 'stopwords', 'adverb_verb', 'count_terms']
+    list_display = [
+        'title',
+        'stopwords',
+        'adverb_verb',
+        'count_terms'
+    ]
 
 
 @admin.register(DocumentTerm)
 class DocumentTermAdmin(admin.ModelAdmin):
-    list_display = ['term', 'frequency']
+
+    list_display = [
+        'term',
+        'frequency',
+        'TF',
+        'IDF',
+        'TFIDF'
+    ]
     list_filter = ['document']
+
+    def TF(self, document):
+        print(document)
+        #tf = LogNormTF()
+        return 'q'
+
+    def IDF(self, term):
+        return term.term
+
+    def TFIDF(self, term):
+        return term.term
 
 
 @admin.register(Term)
@@ -22,14 +45,5 @@ class TermAdmin(admin.ModelAdmin):
     list_display = [
         'term',
         'frequency',
-        'TF',
     ]
 
-    def TF(self, term):
-        return getTF(term)
-
-    def IDF(self, term):
-        return getIDF(term)
-
-    def TFIDF(self, term):
-        return getTFIDF(term)

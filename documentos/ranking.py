@@ -1,9 +1,7 @@
-from abc import ABCMeta, abstractmethod
-
 from django.db.models import Count, Max
-
 from documentos.models import *
 from math import log
+from abc import ABCMeta, abstractmethod
 
 
 class TFAbstract(metaclass=ABCMeta):
@@ -26,7 +24,7 @@ class IDFAbstract(metaclass=ABCMeta):
 class LogNormTF(TFAbstract):
     # Log Normalization Algorithm
     def calculate(self, term: Term, document: Document):
-        return 1 + log(term.frequency)
+        return 1 + log(DocumentTerm.objects.filter(term=term, document=document).first().frequency, 2)
 
 
 class DoubleNormTF(TFAbstract):
@@ -58,21 +56,39 @@ class OriginalIDF(IDFAbstract):
 class DefaultIDF(IDFAbstract):
     # Default Algorithm
     def calculate(self, term: Term, document: Document):
-        return log(getOrigIDF(term))
-      
-
-# Log Normalization Algorithm
-def getTF(term: Term):
-    return 1 + log(term.frequency)
+        return log(getOrigIDF(term), 2)
 
 
-# Inverse Frequency Algorithm
-def getIDF(term: Term):
-    qtdDocs = Document.objects.count()
-    qtdDocsTerm = Document.objects.filter(terms=term).count()
-    return log(qtdDocsTerm / qtdDocs)
+class SmoothIDF(IDFAbstract):
+    # Smooth Algorithm
+    def calculate(self, term: Term, document: Document):
+        return log(1 + getOrigIDF(term), 2)
 
 
-# TF * IDF
-def getTFIDF(term: Term):
-    return getTF(term) * getIDF(term)
+class MaxFrequenceIDF(IDFAbstract):
+    # Max Frenquence Algorithm
+    def calculate(self, term: Term, document: Document):
+        max_freq_in_doc = getMaxFreqInDoc(document)
+        qtd_docs_term = DocumentTerm.objects.filter(term=term)
+        return log(1 + max_freq_in_doc / qtd_docs_term, 2)
+
+
+class ProbabilisticIDF(IDFAbstract):
+    # Probabilistic Algorithm
+    def calculate(self, term: Term, document: Document):
+        qtd_docs = Document.objects.count()
+        qtd_docs_term = DocumentTerm.objects.filter(term=term)
+        return (qtd_docs - qtd_docs_term) / qtd_docs_term
+
+
+def getOrigIDF(term: Term):
+    # Algoritmo original de IDF
+    qtd_docs = Document.objects.count()
+    qtd_docs_term = DocumentTerm.objects.filter(term=term)
+    return qtd_docs / qtd_docs_term
+
+
+def getMaxFreqInDoc(document: Document):
+    # Retorna a maior frequência dos termos em um documento
+    return DocumentTerm.objects.filter(document=document).annotate(num_terms=Count('term')) \
+        .aggregate(max=Max('num_terms'))

@@ -84,9 +84,10 @@ post_save.connect(add_corpus, sender=Document)
 
 
 class DocumentTerm(models.Model):
-    document = models.ForeignKey(Document,  on_delete=models.CASCADE, blank=True, null=True)
+    document = models.ForeignKey(Document, on_delete=models.CASCADE, blank=True, null=True)
     term = models.ForeignKey(Term, on_delete=models.CASCADE, blank=True, null=True)
     frequency = models.IntegerField(default=0)
 
     def __str__(self):
         return self.term
+
